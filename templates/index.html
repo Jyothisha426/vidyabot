@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VidyaBot</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Fraunces:ital,wght@0,400;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #1a6344; --green-light: #e8f5ee; --green-mid: #2d7a55;
+  --text: #1a1a1a; --muted: #6b7280; --border: #e5e7eb;
+  --bg: #f9f8f6; --white: #ffffff;
+}
+html, body { height: 100%; font-family: 'Instrument Sans', sans-serif; background: var(--bg); color: var(--text); }
+
+.screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.card { background: var(--white); border: 1px solid var(--border); border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 440px; }
+.brand { font-family: 'Fraunces', serif; font-size: 28px; color: var(--green); margin-bottom: 4px; }
+.tagline { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+.section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.field input, .field select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; font-family: inherit; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
+.field input:focus, .field select:focus { border-color: var(--green); background: var(--white); }
+
+.btn { width: 100%; padding: 12px; background: var(--green); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
+.btn:hover { background: var(--green-mid); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--green); border: 1px solid var(--border); margin-top: 10px; }
+.btn-ghost:hover { background: var(--green-light); }
+
+.topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.topic-pill { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 13px; font-family: inherit; background: var(--bg); cursor: pointer; text-align: left; color: var(--text); transition: all 0.15s; text-transform: capitalize; }
+.topic-pill:hover { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.topic-pill.selected { border-color: var(--green); background: var(--green-light); color: var(--green); font-weight: 600; }
+
+.chat-wrap { display: none; flex-direction: column; height: 100vh; overflow: hidden; }
+.topbar { flex-shrink: 0; height: 52px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 8px; }
+.topbar .logo { font-family: 'Fraunces', serif; font-size: 17px; color: var(--green); margin-right: 4px; }
+.chip { background: var(--green-light); color: var(--green); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; text-transform: capitalize; }
+.chip.topic { background: #fef3c7; color: #92400e; }
+.counter { margin-left: auto; font-size: 12px; color: var(--muted); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #d1d5db; margin-left: 8px; }
+.status-dot.live { background: #22c55e; }
+
+.messages-area { flex: 1; overflow-y: auto; padding: 24px 20px; display: flex; flex-direction: column; gap: 14px; }
+.msg { max-width: 70%; line-height: 1.55; font-size: 14px; animation: pop 0.2s ease; }
+@keyframes pop { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.msg.bot { align-self: flex-start; background: var(--white); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; padding: 12px 16px; }
+.msg.user { align-self: flex-end; background: var(--green); color: white; border-radius: 14px 14px 4px 14px; padding: 12px 16px; }
+.msg.thinking { align-self: flex-start; color: var(--muted); font-style: italic; font-size: 13px; padding: 8px 0; }
+.msg.summary { align-self: center; background: #fef3c7; color: #92400e; border-radius: 10px; padding: 10px 16px; font-size: 13px; max-width: 85%; text-align: center; }
+.msg-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.4; margin-bottom: 5px; }
+
+.hint-bar { flex-shrink: 0; background: #fef3c7; padding: 6px 20px; font-size: 12px; color: #92400e; display: none; }
+.lang-bar { flex-shrink: 0; text-align: center; font-size: 11px; color: var(--muted); padding: 3px 0; }
+.input-bar { flex-shrink: 0; background: var(--white); border-top: 1px solid var(--border); padding: 14px 16px; display: flex; gap: 10px; align-items: flex-end; }
+.input-bar textarea { flex: 1; resize: none; border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 14px; font-family: inherit; line-height: 1.5; max-height: 100px; outline: none; background: var(--bg); color: var(--text); transition: border-color 0.15s; }
+.input-bar textarea:focus { border-color: var(--green); background: var(--white); }
+.btn-send { flex-shrink: 0; width: 40px; height: 40px; background: var(--green); color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+.btn-send:hover { background: var(--green-mid); }
+.btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: SETUP -->
+<div class="screen" id="s1">
+  <div class="card">
+    <div class="brand">VidyaBot</div>
+    <div class="tagline">Your personal AI tutor — offline, in your language</div>
+    <div class="field"><label>Your name</label><input type="text" id="studentName" placeholder="e.g. Priya" /></div>
+    <div class="field"><label>Class</label>
+      <select id="classLevel">
+        <option value="6">Class 6</option><option value="7">Class 7</option>
+        <option value="8">Class 8</option><option value="9">Class 9</option>
+        <option value="10" selected>Class 10</option>
+      </select>
+    </div>
+    <div class="field"><label>Subject</label>
+      <select id="subject">
+        <option value="mathematics">Mathematics</option>
+        <option value="science">Science</option>
+        <option value="social_science">Social Science</option>
+      </select>
+    </div>
+    <div class="field"><label>Language</label>
+      <select id="language">
+        <option value="English">English</option>
+        <option value="Hindi">Hindi — हिंदी</option>
+        <option value="Telugu">Telugu — తెలుగు</option>
+      </select>
+    </div>
+    <button class="btn" id="startBtn" onclick="goToTopics()">Continue →</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: TOPIC PICKER -->
+<div class="screen" id="s2" style="display:none">
+  <div class="card">
+    <div class="brand">Choose a topic</div>
+    <div class="tagline" id="s2tag">Pick what you want to study today</div>
+    <div class="section-label">NCERT TOPICS</div>
+    <div class="topic-grid" id="topicGrid"></div>
+    <button class="btn" id="beginBtn" onclick="beginTopic()" disabled>Start lesson →</button>
+    <button class="btn btn-ghost" onclick="skipTopic()">Ask anything (no topic)</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: CHAT -->
+<div class="chat-wrap" id="s3">
+  <div class="topbar">
+    <span class="logo">VidyaBot</span>
+    <span class="chip" id="chipName"></span>
+    <span class="chip" id="chipSubject"></span>
+    <span class="chip topic" id="chipTopic" style="display:none"></span>
+    <span class="counter" id="counter">0 questions</span>
+    <div class="status-dot" id="statusDot"></div>
+  </div>
+  <div class="messages-area" id="msgs"></div>
+  <div class="hint-bar" id="hintBar">Type <strong>hint</strong> if you get stuck!</div>
+  <div class="lang-bar" id="langBar"></div>
+  <div class="input-bar">
+    <textarea id="userInput" rows="1"
+      placeholder="Ask anything — Telugu, Hindi, or English..."
+      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="btn-send" id="sendBtn" onclick="sendMessage()">&#9658;</button>
+  </div>
+</div>
+
+<script>
+var msgCount = 0;
+var selectedTopic = null;
+var STATE = {};
+
+function show(id) {
+  ['s1','s2','s3'].forEach(function(s) {
+    var el = document.getElementById(s);
+    if (s === 's3') { el.style.display = (s === id) ? 'flex' : 'none'; }
+    else { el.style.display = (s === id) ? 'flex' : 'none'; }
+  });
+}
+
+async function goToTopics() {
+  var name = document.getElementById('studentName').value.trim();
+  if (!name) { alert('Please enter your name!'); return; }
+
+  var btn = document.getElementById('startBtn');
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+
+  STATE = {
+    student_name: name,
+    subject: document.getElementById('subject').value,
+    class_level: document.getElementById('classLevel').value,
+    language: document.getElementById('language').value
+  };
+
+  try {
+    var r = await fetch('/api/start', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(STATE)
+    });
+    var d = await r.json();
+
+    console.log('API /start response:', d);
+    console.log('Topics:', d.topics);
+
+    document.getElementById('s2tag').textContent =
+      STATE.subject + ' · Class ' + STATE.class_level + ' · ' + STATE.language;
+
+    var grid = document.getElementById('topicGrid');
+    grid.innerHTML = '';
+
+    var topics = d.topics;
+    if (!topics || topics.length === 0) {
+      grid.innerHTML = '<p style="color:#999;font-size:13px;grid-column:1/-1">No topics found.</p>';
+    } else {
+      for (var i = 0; i < topics.length; i++) {
+        (function(t) {
+          var pill = document.createElement('button');
+          pill.className = 'topic-pill';
+          pill.textContent = t;
+          pill.onclick = function() {
+            document.querySelectorAll('.topic-pill').forEach(function(p) { p.classList.remove('selected'); });
+            pill.classList.add('selected');
+            selectedTopic = t;
+            document.getElementById('beginBtn').disabled = false;
+          };
+          grid.appendChild(pill);
+        })(topics[i]);
+      }
+    }
+
+    document.getElementById('chipName').textContent = name;
+    document.getElementById('chipSubject').textContent = STATE.subject;
+
+    show('s2');
+  } catch(e) {
+    console.error('Error:', e);
+    alert('Could not connect. Is the server running?');
+    btn.disabled = false;
+    btn.textContent = 'Continue →';
+  }
+}
+
+async function beginTopic() {
+  if (!selectedTopic) return;
+  var btn = document.getElementById('beginBtn');
+  btn.disabled = true;
+  btn.textContent = 'Starting...';
+
+  try {
+    var r = await fetch('/api/begin-topic', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({topic: selectedTopic})
+    });
+    var d = await r.json();
+
+    document.getElementById('chipTopic').textContent = selectedTopic;
+    document.getElementById('chipTopic').style.display = '';
+    show('s3');
+    addMsg(d.welcome, 'bot');
+    setTimeout(function() { document.getElementById('hintBar').style.display = 'block'; }, 3000);
+  } catch(e) {
+    alert('Error starting topic.');
+    btn.disabled = false;
+    btn.textContent = 'Start lesson →';
+  }
+}
+
+async function skipTopic() {
+  var lang = STATE.language || 'English';
+  var name = STATE.student_name || 'Student';
+  var welcomes = {
+    'English': 'Namaste ' + name + '! What would you like to learn today? Type hint anytime you are stuck.',
+    'Hindi': 'नमस्ते ' + name + '! आज क्या पढ़ना है?',
+    'Telugu': 'నమస్కారం ' + name + '! ఎందుకు కూర్చోండి?'
+  };
+  show('s3');
+  addMsg(welcomes[lang] || welcomes['English'], 'bot');
+  setTimeout(function() { document.getElementById('hintBar').style.display = 'block'; }, 3000);
+}
+
+async function sendMessage() {
+  var input = document.getElementById('userInput');
+  var msg = input.value.trim();
+  if (!msg) return;
+
+  addMsg(msg, 'user');
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+
+  var tid = addMsg('Thinking...', 'thinking');
+
+  try {
+    var r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: msg})
+    });
+    var d = await r.json();
+
+    document.getElementById(tid).remove();
+    addMsg(d.reply, 'bot');
+
+    if (d.hint_count > 0) {
+      document.getElementById('hintBar').textContent = 'Hint level ' + d.hint_count + ' — type hint again for more help!';
+      document.getElementById('hintBar').style.display = 'block';
+    }
+    if (d.summary) addMsg(d.summary, 'summary');
+
+    msgCount++;
+    document.getElementById('counter').textContent = msgCount + (msgCount === 1 ? ' question' : ' questions');
+    if (d.language) document.getElementById('langBar').textContent = 'Detected: ' + d.language;
+  } catch(e) {
+    document.getElementById(tid).remove();
+    addMsg('Something went wrong. Please try again.', 'bot');
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('userInput').focus();
+}
+
+function addMsg(text, type) {
+  var area = document.getElementById('msgs');
+  var id = 'msg-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+  var div = document.createElement('div');
+  div.className = 'msg ' + type;
+  div.id = id;
+  if (type === 'bot') { div.innerHTML = '<div class="msg-label">VidyaBot</div>' + text; }
+  else if (type === 'user') { div.innerHTML = '<div class="msg-label">You</div>' + text; }
+  else { div.textContent = text; }
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return id;
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+async function checkStatus() {
+  try {
+    var r = await fetch('/api/status');
+    var d = await r.json();
+    document.getElementById('statusDot').classList.toggle('live', d.ollama);
+  } catch(e) {}
+}
+
+checkStatus();
+setInterval(checkStatus, 8000);
+</script>
+</body>
+</html>

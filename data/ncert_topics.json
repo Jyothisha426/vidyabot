@@ -1,0 +1,130 @@
+{
+  "mathematics": {
+    "class_6": [
+      "number system",
+      "fractions",
+      "decimals",
+      "geometry",
+      "mensuration",
+      "algebra"
+    ],
+    "class_7": [
+      "integers",
+      "fractions and decimals",
+      "simple equations",
+      "lines and angles",
+      "triangles",
+      "congruence"
+    ],
+    "class_8": [
+      "rational numbers",
+      "linear equations",
+      "quadrilaterals",
+      "practical geometry",
+      "exponents",
+      "mensuration"
+    ],
+    "class_9": [
+      "number systems",
+      "polynomials",
+      "coordinate geometry",
+      "linear equations",
+      "triangles",
+      "circles",
+      "surface areas"
+    ],
+    "class_10": [
+      "real numbers",
+      "polynomials",
+      "pair of linear equations",
+      "quadratic equations",
+      "arithmetic progressions",
+      "triangles",
+      "trigonometry",
+      "statistics",
+      "probability"
+    ]
+  },
+  "science": {
+    "class_6": [
+      "food",
+      "materials",
+      "living world",
+      "motion",
+      "light",
+      "electricity",
+      "magnets"
+    ],
+    "class_7": [
+      "nutrition",
+      "respiration",
+      "transportation",
+      "reproduction",
+      "weather",
+      "winds",
+      "soil",
+      "forests"
+    ],
+    "class_8": [
+      "crop production",
+      "microorganisms",
+      "coal and petroleum",
+      "combustion",
+      "cell",
+      "friction",
+      "sound"
+    ],
+    "class_9": [
+      "matter",
+      "atoms and molecules",
+      "cell",
+      "tissues",
+      "motion",
+      "force",
+      "gravitation",
+      "work and energy",
+      "sound"
+    ],
+    "class_10": [
+      "chemical reactions",
+      "acids bases salts",
+      "metals and non-metals",
+      "carbon compounds",
+      "life processes",
+      "control and coordination",
+      "reproduction",
+      "electricity",
+      "light",
+      "environment"
+    ]
+  },
+  "social_science": {
+    "class_9": [
+      "french revolution",
+      "russian revolution",
+      "nazism",
+      "forest society",
+      "pastoralists",
+      "democracy",
+      "electoral politics",
+      "drainage",
+      "climate",
+      "population"
+    ],
+    "class_10": [
+      "nationalism",
+      "age of industrialisation",
+      "print culture",
+      "novel",
+      "resources",
+      "agriculture",
+      "manufacturing",
+      "globalisation",
+      "power sharing",
+      "federalism",
+      "democracy",
+      "money and credit",
+      "consumer rights"
+    ]
+  }
+}

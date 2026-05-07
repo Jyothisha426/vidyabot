@@ -1,0 +1,16 @@
+﻿body {
+    background: #f0f4f8;
+}
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+.chat-messages::-webkit-scrollbar-track {
+    background: #f0f4f8;
+}
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #b7e4c7;
+    border-radius: 3px;
+}
+.message.bot strong {
+    color: #2d6a4f;
+}
