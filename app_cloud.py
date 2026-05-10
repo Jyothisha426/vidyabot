@@ -29,18 +29,28 @@ def query_gemma(prompt):
     }
     payload = {
         "model": "google/gemma-2-2b-it",
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
         "max_tokens": 200,
-        "temperature": 0.7
+        "temperature": 0.7,
+        "stream": False
     }
     try:
-        r = http_requests.post(HF_API_URL, headers=headers, json=payload, timeout=60)
-        r.raise_for_status()
+        r = http_requests.post(
+            "https://router.huggingface.co/hf-inference/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=60
+        )
+        # Log the actual error for debugging
+        if r.status_code != 200:
+            return "API Error " + str(r.status_code) + ": " + r.text[:200]
         result = r.json()
         text = result["choices"][0]["message"]["content"].strip()
         return text if text else "I could not generate a response. Please try again."
     except Exception as e:
-        return "Error connecting to AI: " + str(e)
+        return "Error: " + str(e)
 
 def detect_language(text):
     try:
