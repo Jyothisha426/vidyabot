@@ -1,3 +1,12 @@
+---
+title: VidyaBot
+emoji: 📚
+colorFrom: green
+colorTo: blue
+sdk: docker
+pinned: false
+---
+
 # VidyaBot — Offline AI Tutor for Rural India
 
 > Built for the Gemma 4 Good Hackathon · Future of Education Track
