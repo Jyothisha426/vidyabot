@@ -1,10 +1,4 @@
-"""
-Run this from C:\\Users\\jyoth\\vidyabot\\vidyabot
-Creates all files needed for HuggingFace Spaces deployment
-"""
-
-# ── app_cloud.py ──────────────────────────────────────────────
-APP_CLOUD = '''from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session
 import json
 import os
 import requests as http_requests
@@ -60,11 +54,11 @@ def build_prompt(message, history, student_name, subject, class_level, hint_coun
 
     hint_rule = ""
     if hint_count == 1:
-        hint_rule = "\\nHINT LEVEL 1: Give only a tiny one-sentence hint. No full answer."
+        hint_rule = "\nHINT LEVEL 1: Give only a tiny one-sentence hint. No full answer."
     elif hint_count == 2:
-        hint_rule = "\\nHINT LEVEL 2: Show the first step. Still no full answer."
+        hint_rule = "\nHINT LEVEL 2: Show the first step. Still no full answer."
     elif hint_count >= 3:
-        hint_rule = "\\nHINT LEVEL 3: Give most of the working. Leave final step for student."
+        hint_rule = "\nHINT LEVEL 3: Give most of the working. Leave final step for student."
 
     system = """You are VidyaBot, a warm patient tutor.
 Student name: """ + student_name + """ (this is their NAME, not a topic).
@@ -72,11 +66,11 @@ Student name: """ + student_name + """ (this is their NAME, not a topic).
 RULES: Never give the direct answer. Use Socratic method. Ask guiding questions.
 Max 3 sentences. End with one question. Be encouraging.""" + hint_rule + """
 """
-    prompt = system + "\\n"
+    prompt = system + "\n"
     for msg in history[-6:]:
         role = "Student" if msg["role"] == "user" else "VidyaBot"
-        prompt += role + ": " + msg["content"] + "\\n"
-    prompt += "Student: " + message + "\\nVidyaBot:"
+        prompt += role + ": " + msg["content"] + "\n"
+    prompt += "Student: " + message + "\nVidyaBot:"
     return prompt
 
 @app.route("/")
@@ -124,7 +118,7 @@ def begin_topic():
     session_id = session.get("session_id")
 
     welcomes = {
-        "English": "Let\'s study " + topic + " today! What do you already know about " + topic + "?",
+        "English": "Let's study " + topic + " today! What do you already know about " + topic + "?",
         "Hindi": "आज हम " + topic + " पढ़ेंगे! इसके बारे में आप क्या जानते हैं?",
         "Telugu": "ఈరోజు " + topic + " చదువుదాం! దీని గురించి మీకు ఏమైనా తెలుసా?"
     }
@@ -153,7 +147,7 @@ def chat():
 
     save_message(session_id, "user", user_message)
 
-    hint_words = ["hint", "clue", "stuck", "dont know", "don\'t know"]
+    hint_words = ["hint", "clue", "stuck", "dont know", "don't know"]
     if any(w in user_message.lower() for w in hint_words):
         hint_count += 1
 
@@ -193,65 +187,3 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 7860))
     print("VidyaBot starting on port", port)
     app.run(host="0.0.0.0", port=port)
-'''
-
-# ── Dockerfile ────────────────────────────────────────────────
-DOCKERFILE = '''FROM python:3.11-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-RUN mkdir -p data static
-
-EXPOSE 7860
-
-ENV FLASK_ENV=production
-
-CMD ["python", "app_cloud.py"]
-'''
-
-# ── requirements.txt (updated) ────────────────────────────────
-REQUIREMENTS = '''flask
-requests
-langdetect
-gunicorn
-'''
-
-# ── .env.example ─────────────────────────────────────────────
-ENV_EXAMPLE = '''HF_TOKEN=your_huggingface_token_here
-SECRET_KEY=your_secret_key_here
-'''
-
-# Write all files
-import os
-
-with open("app_cloud.py", "w", encoding="utf-8") as f:
-    f.write(APP_CLOUD)
-print("app_cloud.py created")
-
-with open("Dockerfile", "w", encoding="utf-8") as f:
-    f.write(DOCKERFILE)
-print("Dockerfile created")
-
-with open("requirements.txt", "w", encoding="utf-8") as f:
-    f.write(REQUIREMENTS)
-print("requirements.txt updated")
-
-with open(".env.example", "w", encoding="utf-8") as f:
-    f.write(ENV_EXAMPLE)
-print(".env.example created")
-
-print("""
-All files created!
-
-Next steps:
-1. Run: git add .
-2. Run: git commit -m 'Add cloud deployment files'
-3. Run: git push
-
-Then we set up HuggingFace Spaces to pull from GitHub.
-""")
