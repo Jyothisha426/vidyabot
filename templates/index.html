@@ -134,6 +134,7 @@ html, body { height: 100%; font-family: 'Instrument Sans', sans-serif; backgroun
 var msgCount = 0;
 var selectedTopic = null;
 var STATE = {};
+var SID = null;
 
 function show(id) {
   ['s1','s2','s3'].forEach(function(s) {
@@ -168,6 +169,8 @@ async function goToTopics() {
 
     console.log('API /start response:', d);
     console.log('Topics:', d.topics);
+    SID = d.sid || null;
+    console.log('SID:', SID);
 
     document.getElementById('s2tag').textContent =
       STATE.subject + ' · Class ' + STATE.class_level + ' · ' + STATE.language;
@@ -217,7 +220,7 @@ async function beginTopic() {
     var r = await fetch('/api/begin-topic', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({topic: selectedTopic})
+      body: JSON.stringify({topic: selectedTopic, sid: SID})
     });
     var d = await r.json();
 
@@ -262,12 +265,12 @@ async function sendMessage() {
     var r = await fetch('/api/chat', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({message: msg})
+      body: JSON.stringify({message: msg, sid: SID})
     });
     var d = await r.json();
 
     document.getElementById(tid).remove();
-    addMsg(d.reply, 'bot');
+    addMsg(d.reply || d.error || 'Something went wrong.', 'bot');
 
     if (d.hint_count > 0) {
       document.getElementById('hintBar').textContent = 'Hint level ' + d.hint_count + ' — type hint again for more help!';
