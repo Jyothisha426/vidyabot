@@ -10,7 +10,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "vidyabot-hf-2026-secret")
 
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 HF_MODEL = "google/gemma-2-2b-it"
-HF_API_URL = "https://api-inference.huggingface.co/models/" + HF_MODEL
+HF_API_URL = "https://router.huggingface.co/hf-inference/models/google/gemma-2-2b-it/v1/chat/completions"
 
 init_db()
 
@@ -23,25 +23,22 @@ SESSIONS = {}
 def query_gemma(prompt):
     if not HF_TOKEN:
         return "HF_TOKEN not set. Please add it in Space settings."
-    headers = {"Authorization": "Bearer " + HF_TOKEN}
+    headers = {
+        "Authorization": "Bearer " + HF_TOKEN,
+        "Content-Type": "application/json"
+    }
     payload = {
-        "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 200,
-            "temperature": 0.7,
-            "return_full_text": False
-        }
+        "model": "google/gemma-2-2b-it",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 200,
+        "temperature": 0.7
     }
     try:
         r = http_requests.post(HF_API_URL, headers=headers, json=payload, timeout=60)
         r.raise_for_status()
         result = r.json()
-        if isinstance(result, list) and len(result) > 0:
-            text = result[0].get("generated_text", "").strip()
-            return text if text else "I could not generate a response. Please try again."
-        elif isinstance(result, dict) and "error" in result:
-            return "Model is loading, please wait a moment and try again."
-        return "I could not generate a response. Please try again."
+        text = result["choices"][0]["message"]["content"].strip()
+        return text if text else "I could not generate a response. Please try again."
     except Exception as e:
         return "Error connecting to AI: " + str(e)
 
