@@ -10,7 +10,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "vidyabot-hf-2026-secret")
 
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 HF_MODEL = "google/gemma-2-2b-it"
-HF_API_URL = "https://router.huggingface.co/hf-inference/models/google/gemma-2-2b-it/v1/chat/completions"
+HF_API_URL = "https://router.huggingface.co/hf-inference/v1/chat/completions"
 
 init_db()
 
