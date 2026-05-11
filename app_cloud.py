@@ -3,6 +3,7 @@ import json
 import os
 import uuid
 import requests as http_requests
+from huggingface_hub import InferenceClient
 from database import init_db, create_session, save_message, update_progress, get_student_progress
 
 app = Flask(__name__)
@@ -23,31 +24,18 @@ SESSIONS = {}
 def query_gemma(prompt):
     if not HF_TOKEN:
         return "HF_TOKEN not set. Please add it in Space settings."
-    headers = {
-        "Authorization": "Bearer " + HF_TOKEN,
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": "google/gemma-2-2b-it",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "max_tokens": 200,
-        "temperature": 0.7,
-        "stream": False
-    }
     try:
-        r = http_requests.post(
-            "https://router.huggingface.co/hf-inference/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=60
+        client = InferenceClient(
+            provider="hf-inference",
+            api_key=HF_TOKEN,
         )
-        # Log the actual error for debugging
-        if r.status_code != 200:
-            return "API Error " + str(r.status_code) + ": " + r.text[:200]
-        result = r.json()
-        text = result["choices"][0]["message"]["content"].strip()
+        completion = client.chat.completions.create(
+            model="google/gemma-2-2b-it",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=200,
+            temperature=0.7,
+        )
+        text = completion.choices[0].message.content.strip()
         return text if text else "I could not generate a response. Please try again."
     except Exception as e:
         return "Error: " + str(e)
